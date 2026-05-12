@@ -1,0 +1,180 @@
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "og-image.jpg",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=86400" }
+        ]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|png|gif|webp|svg|ico)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=604800" }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/createOrder",
+        "function": "createOrder"
+      },
+      {
+        "source": "/api/newebpayNotify",
+        "function": "newebpayNotify"
+      },
+      {
+        "source": "/api/refund",
+        "function": "handleRefund"
+      },
+      {
+        "source": "/api/courseAccess/**",
+        "function": "getCourseAccess"
+      },
+      {
+        "source": "/api/lineLogin",
+        "function": "lineLogin"
+      },
+      {
+        "source": "/api/lineCallback",
+        "function": "lineCallback"
+      },
+      {
+        "source": "/api/lineBroadcast",
+        "function": "lineBroadcast"
+      },
+      {
+        "source": "/api/sendLineToUser",
+        "function": "sendLineToUser"
+      },
+      {
+        "source": "/api/googleLogin",
+        "function": "googleLogin"
+      },
+      {
+        "source": "/api/googleCallback",
+        "function": "googleCallback"
+      },
+      {
+        "source": "/api/facebookLogin",
+        "function": "facebookLogin"
+      },
+      {
+        "source": "/api/facebookCallback",
+        "function": "facebookCallback"
+      },
+      {
+        "source": "/api/trackEvent",
+        "function": "trackEvent"
+      },
+      {
+        "source": "/api/cancelOrder",
+        "function": "cancelOrder"
+      },
+      {
+        "source": "/api/retryPayment",
+        "function": "retryPayment"
+      },
+      {
+        "source": "/api/atmCallback",
+        "function": "atmCallback"
+      },
+      {
+        "source": "/api/mergeAccounts",
+        "function": "mergeAccounts"
+      },
+      {
+        "source": "/api/lineWebhook",
+        "function": "lineWebhook"
+      },
+      {
+        "source": "/api/getMessageLogs",
+        "function": "getMessageLogs"
+      },
+      {
+        "source": "/api/requestRefund",
+        "function": "requestRefund"
+      },
+      {
+        "source": "/api/completeRefund",
+        "function": "completeRefund"
+      },
+      {
+        "source": "/api/uploadRefundForm",
+        "function": "uploadRefundForm"
+      },
+      {
+        "source": "/api/freeOrder",
+        "function": "freeOrder"
+      },
+      {
+        "source": "/api/adminIssueInvoice",
+        "function": "adminIssueInvoice"
+      },
+      {
+        "source": "/api/adminCancelInvoice",
+        "function": "adminCancelInvoice"
+      },
+      {
+        "source": "/api/adminResendInvoice",
+        "function": "adminResendInvoice"
+      },
+      {
+        "source": "/api/getApiSettings",
+        "function": "getApiSettings"
+      },
+      {
+        "source": "/api/updateApiSettings",
+        "function": "updateApiSettings"
+      },
+      {
+        "source": "/api/testApiConnection",
+        "function": "testApiConnection"
+      },
+      {
+        "source": "/api/waiveRefund",
+        "function": "waiveRefund"
+      },
+      {
+        "source": "/api/applyLineGroup",
+        "function": "applyLineGroup"
+      },
+      {
+        "source": "/api/confirmLineGroup",
+        "function": "confirmLineGroup"
+      },
+      {
+        "source": "/api/getDownloadUrl",
+        "function": "getDownloadUrl"
+      },
+      {
+        "source": "/api/fixOrderStatus",
+        "function": "fixOrderStatus"
+      },
+      {
+        "source": "/api/adminUpdateCourse",
+        "function": "adminUpdateCourse"
+      },
+      {
+        "source": "/api/adminSendEmail",
+        "function": "adminSendEmail"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  }
+}

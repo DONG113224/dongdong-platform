@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users: 本人或 admin 可讀，本人可寫，但禁止客戶端修改 purchasedCourses、lineId、messagingLineId（僅 Cloud Functions 可改）
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['purchasedCourses', 'lineId', 'messagingLineId']));
+    }
+
+    // courses: 所有人可讀已發布課程，只有 admin 可寫
+    match /courses/{courseId} {
+      allow read: if resource.data.isPublished == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // orders: admin 可讀全部，一般用戶需用 where userId == uid 查詢
+    match /orders/{orderId} {
+      allow read: if request.auth != null && isAdmin();
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // invoices: 只有 admin 可讀，只有 Cloud Functions 可寫
+    match /invoices/{invoiceId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // admins: 只有 admin 可讀，禁止前端寫入
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // analytics: Cloud Functions 可寫，admin 可讀
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /analytics/{docId}/sessions/{sessionId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // cartEvents: 用戶可寫自己的，admin 可讀
+    match /cartEvents/{userId} {
+      allow read: if isAdmin();
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // broadcastLogs: admin 可讀，Cloud Functions 可寫
+    match /broadcastLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // mergeRequests: 只有 Cloud Functions 可讀寫（一次性合併 token）
+    match /mergeRequests/{tokenId} {
+      allow read, write: if false;
+    }
+
+    // config: 只有 Cloud Functions 可讀寫
+    match /config/{docId} {
+      allow read, write: if false;
+    }
+
+    // Helper: 檢查是否為管理員
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+  }
+}
