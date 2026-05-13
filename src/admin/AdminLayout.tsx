@@ -65,11 +65,17 @@ export default function AdminLayout() {
           <NavLink to="/admin/revenue" className={linkClass} onClick={handleNavClick}>業績報表</NavLink>
           <NavLink to="/admin/profit" className={linkClass} onClick={handleNavClick}>利潤報表</NavLink>
           <NavLink to="/admin/courses" className={linkClass} onClick={handleNavClick}>課程管理</NavLink>
+          <NavLink to="/admin/checkin" className={linkClass} onClick={handleNavClick}>報到管理</NavLink>
+          <NavLink to="/admin/checkin-scan" className={linkClass} onClick={handleNavClick}>報到掃描</NavLink>
           <NavLink to="/admin/refunds" className={linkClass} onClick={handleNavClick}>退款管理</NavLink>
           <NavLink to="/admin/no-refund" className={linkClass} onClick={handleNavClick}>不退款列表</NavLink>
+          <NavLink to="/admin/pending-allowance" className={linkClass} onClick={handleNavClick}>跨期待處理發票</NavLink>
           <NavLink to="/admin/line-notify" className={linkClass} onClick={handleNavClick}>LINE 通知</NavLink>
+          <NavLink to="/admin/course-notify" className={linkClass} onClick={handleNavClick}>課中推播</NavLink>
           <NavLink to="/admin/messages" className={linkClass} onClick={handleNavClick}>訊息紀錄</NavLink>
           <NavLink to="/admin/api-settings" className={linkClass} onClick={handleNavClick}>API 串接</NavLink>
+          <NavLink to="/admin/accounts" className={linkClass} onClick={handleNavClick}>帳號管理</NavLink>
+          <NavLink to="/admin/audit-log" className={linkClass} onClick={handleNavClick}>工作紀錄</NavLink>
         </nav>
         <button
           onClick={handleLogout}
