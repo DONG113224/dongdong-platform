@@ -1,3 +1,9 @@
+import { type ReactNode } from 'react';
+
+// Admin auth check temporarily disabled - allow direct access
+export default function AdminGuard({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+}
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
