@@ -9,6 +9,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await signOut(auth);
+    localStorage.removeItem('admin_auth');
     navigate('/admin');
   };
 
@@ -58,6 +59,7 @@ export default function AdminLayout() {
         </div>
         <nav className="space-y-2 flex-1">
           <NavLink to="/admin/dashboard" className={linkClass} onClick={handleNavClick}>儀表板</NavLink>
+          <NavLink to="/admin/members" className={linkClass} onClick={handleNavClick}>會員管理</NavLink>
           <NavLink to="/admin/analytics" className={linkClass} onClick={handleNavClick}>數據分析</NavLink>
           <NavLink to="/admin/orders" className={linkClass} onClick={handleNavClick}>訂單列表</NavLink>
           <NavLink to="/admin/revenue" className={linkClass} onClick={handleNavClick}>業績報表</NavLink>
