@@ -31,6 +31,7 @@ import ProfitReport from './admin/ProfitReport';
 import RefundManagement from './admin/RefundManagement';
 import ApiSettings from './admin/ApiSettings';
 import NoRefundList from './admin/NoRefundList';
+import MembersPage from './admin/MembersPage';
 
 export default function App() {
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function App() {
               }
             >
               <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/members" element={<MembersPage />} />
               <Route path="/admin/analytics" element={<AnalyticsPage />} />
               <Route path="/admin/orders" element={<OrderList />} />
               <Route path="/admin/revenue" element={<RevenueReport />} />
