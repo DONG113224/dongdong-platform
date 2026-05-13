@@ -31,6 +31,12 @@ import ProfitReport from './admin/ProfitReport';
 import RefundManagement from './admin/RefundManagement';
 import ApiSettings from './admin/ApiSettings';
 import NoRefundList from './admin/NoRefundList';
+import CheckinScan from './admin/CheckinScan';
+import CheckinPage from './admin/CheckinPage';
+import CourseNotify from './admin/CourseNotify';
+import AccountsPage from './admin/AccountsPage';
+import PendingAllowance from './admin/PendingAllowance';
+import AuditLog from './admin/AuditLog';
 import MembersPage from './admin/MembersPage';
 
 export default function App() {
@@ -71,11 +77,17 @@ export default function App() {
               <Route path="/admin/revenue" element={<RevenueReport />} />
               <Route path="/admin/profit" element={<ProfitReport />} />
               <Route path="/admin/courses" element={<CourseManager />} />
+              <Route path="/admin/checkin" element={<CheckinPage />} />
+              <Route path="/admin/checkin-scan" element={<CheckinScan />} />
               <Route path="/admin/refunds" element={<RefundManagement />} />
               <Route path="/admin/no-refund" element={<NoRefundList />} />
+              <Route path="/admin/pending-allowance" element={<PendingAllowance />} />
               <Route path="/admin/line-notify" element={<LineNotify />} />
+              <Route path="/admin/course-notify" element={<CourseNotify />} />
               <Route path="/admin/messages" element={<MessageLog />} />
               <Route path="/admin/api-settings" element={<ApiSettings />} />
+              <Route path="/admin/accounts" element={<AccountsPage />} />
+              <Route path="/admin/audit-log" element={<AuditLog />} />
             </Route>
           </Routes>
         </CartProvider>
