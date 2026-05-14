@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import SidebarCTA from '../components/SidebarCTA';
 import AuthModal from '../components/AuthModal';
+import Footer from '../components/Footer';
 
 // 課程固定資訊
 const COURSE_ID = 'shopee-100w';
@@ -16,7 +17,7 @@ const COURSE_TITLE = '蝦皮百萬賣家養成班';
 const COURSE_PRICE = 6980;
 
 const barImages = [
-  '/images/銷售頁條圖_學員見證_Eagle_compressed.jpg',
+  // Eagle 推薦圖已移除（度哥素材，待換東樺學員見證）
   '/images/Bar1_Hero_純文字版.png',
   '/images/Bar2_Instructor_講師背書.png',
   '/images/Bar3_PainPoints_痛點共鳴.png',
@@ -190,12 +191,7 @@ export default function SalesPage() {
         ))}
       </div>
 
-      {/* 隱私權條款連結 */}
-      <div className="text-center py-8">
-        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 hover:text-gray-600 underline">
-          隱私權及網站安全政策
-        </a>
-      </div>
+      <Footer />
 
       {/* 底部固定購買列（已購買則不顯示） */}
       {!hideButtons && <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t shadow-lg z-30 py-3 px-4">

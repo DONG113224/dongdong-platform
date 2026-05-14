@@ -15,6 +15,8 @@ import MemberPage from './pages/MemberPage';
 import RefundFormPage from './pages/RefundFormPage';
 import LineAuthPage from './pages/LineAuthPage';
 import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import RefundPolicyPage from './pages/RefundPolicyPage';
 
 // Admin
 import AdminLogin from './admin/AdminLogin';
@@ -60,6 +62,8 @@ export default function App() {
             <Route path="/refund-form" element={<RefundFormPage />} />
             <Route path="/line-auth" element={<LineAuthPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
 
             {/* 管理後台路由 */}
             <Route path="/admin" element={<AdminLogin />} />
