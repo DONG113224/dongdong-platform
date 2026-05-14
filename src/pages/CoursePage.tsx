@@ -102,10 +102,21 @@ export default function CoursePage() {
 
     setVideoLoading(true);
     try {
-      const response = await api.get(`/courseAccess/${courseId}?videoId=${chapter.bunnyVideoId}`);
-      const { token, libraryId, expires } = response.data;
+      // Bunny library id 預設值，避免後端 secret 未設定導致 iframe 壞掉
+      const BUNNY_LIBRARY_ID_FALLBACK = '660260';
+      let libraryIdFinal = BUNNY_LIBRARY_ID_FALLBACK;
+      let tokenQuery = '';
+      try {
+        const response = await api.get(`/courseAccess/${courseId}?videoId=${chapter.bunnyVideoId}`);
+        const { token, libraryId, expires } = response.data || {};
+        if (libraryId) libraryIdFinal = libraryId;
+        if (token && expires) tokenQuery = `?token=${token}&expires=${expires}`;
+      } catch (apiErr) {
+        // 後端 API 失敗仍允許播放（library 目前無 token auth）
+        console.warn('courseAccess API 失敗，使用 fallback library', apiErr);
+      }
       setSignedUrl(
-        `https://iframe.mediadelivery.net/embed/${libraryId}/${chapter.bunnyVideoId}?token=${token}&expires=${expires}`
+        `https://iframe.mediadelivery.net/embed/${libraryIdFinal}/${chapter.bunnyVideoId}${tokenQuery}`
       );
       setVideoError(false);
     } catch (err) {
