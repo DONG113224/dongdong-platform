@@ -25,8 +25,6 @@ const barImages = [
   '/images/Bar4_Curriculum_課程流程.png',
   '/images/Bar5_Stats_數據信任.png',
   '/images/Bar5b_Industry_1to3.jpg',
-  '/images/Bar5c_Industry_4to6.jpg',
-  '/images/Bar5d_Industry_7to12.jpg',
   '/images/Bar6_Pricing_CTA_定價行動.png',
   '/images/Bar7_QA_常見問題.png',
   '/images/Bar8_Bonus_額外加贈.jpg',
