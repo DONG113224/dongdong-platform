@@ -11,6 +11,10 @@ import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { trackEvent } from '../lib/fbpixel';
 import { useAuth } from '../contexts/AuthContext';
 
+// Feature flags — 把 social provider 暫時關掉直到 OAuth 設定完成
+const ENABLE_LINE_LOGIN = false; // 待 LINE Login Channel 設定完
+const ENABLE_FACEBOOK_LOGIN = false; // 待 Facebook App 設定完
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -358,13 +362,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-6">
-          <button
-            onClick={handleLineLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#06C755] text-white py-3 rounded-lg font-medium hover:bg-[#05b04d] disabled:opacity-50"
-          >
-            LINE 登入
-          </button>
+          {ENABLE_LINE_LOGIN && (
+            <button
+              onClick={handleLineLogin}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-[#06C755] text-white py-3 rounded-lg font-medium hover:bg-[#05b04d] disabled:opacity-50"
+            >
+              LINE 登入
+            </button>
+          )}
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
@@ -372,13 +378,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           >
             Google 登入
           </button>
-          <button
-            onClick={handleFacebookLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white py-3 rounded-lg font-medium hover:bg-[#166FE5] disabled:opacity-50"
-          >
-            Facebook 登入
-          </button>
+          {ENABLE_FACEBOOK_LOGIN && (
+            <button
+              onClick={handleFacebookLogin}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-[#1877F2] text-white py-3 rounded-lg font-medium hover:bg-[#166FE5] disabled:opacity-50"
+            >
+              Facebook 登入
+            </button>
+          )}
         </div>
 
         <div className="relative mb-6">
