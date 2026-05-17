@@ -4,6 +4,9 @@ import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'fireb
 import { signOut } from 'firebase/auth';
 import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+
+// Feature flag — 帳號綁定區暫時隱藏（LINE/Google/Facebook 都用舊 OAuth 路徑會壞）
+const ENABLE_SOCIAL_BIND = false;
 import api from '../lib/api';
 import type { Course, Order } from '../types';
 import TopBar from '../components/TopBar';
@@ -413,7 +416,8 @@ export default function MemberPage() {
               </div>
             </div>
 
-            {/* 帳號綁定 */}
+            {/* 帳號綁定 — 暫時隱藏，等 OAuth 設定完恢復 */}
+            {ENABLE_SOCIAL_BIND && (
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-lg font-bold mb-4">帳號綁定</h2>
               <p className="text-sm text-gray-500 mb-4">綁定後可以使用任一方式登入</p>
@@ -480,6 +484,7 @@ export default function MemberPage() {
                 </div>
               </div>
             </div>
+            )}
           </div>
         )}
 
