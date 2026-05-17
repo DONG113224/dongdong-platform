@@ -1,10 +1,14 @@
-import type { Response } from 'express';
+// 兼容 firebase-functions/v2 和 express 的 Response interface
+interface MinimalResponse {
+  setHeader(name: string, value: string): void;
+  send(body: string): unknown;
+}
 
 /**
  * 使用 HTML + JavaScript 跳轉，避免 iOS Universal Links 攔截 302 redirect
  * 導致用戶被帶到 LINE/Google/Facebook APP 而無法完成 OAuth 流程
  */
-export function jsRedirect(res: Response, url: string) {
+export function jsRedirect(res: MinimalResponse, url: string) {
   const escaped = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(`<!DOCTYPE html>
