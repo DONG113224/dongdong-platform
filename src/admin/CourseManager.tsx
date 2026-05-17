@@ -23,6 +23,19 @@ export default function CourseManager() {
   const [upgradeDiscount, setUpgradeDiscount] = useState<number>(0);
   const [upgradeWindowDays, setUpgradeWindowDays] = useState<number>(7);
 
+  // 引流課銷售頁模板設定（/intro/{slug} 自動渲染）
+  const [introSlug, setIntroSlug] = useState<string>('');
+  const [introHeroTitle, setIntroHeroTitle] = useState<string>('');
+  const [introHeroSubtitle, setIntroHeroSubtitle] = useState<string>('');
+  const [introHeroImage, setIntroHeroImage] = useState<string>('');
+  const [introPainPoints, setIntroPainPoints] = useState<string[]>(['', '', '', '', '']);
+  const [introBenefits, setIntroBenefits] = useState<string[]>(['', '', '', '', '']);
+  const [introCtaPrimary, setIntroCtaPrimary] = useState<string>('');
+  const [introBonusItems, setIntroBonusItems] = useState<Array<{ title: string; value: number }>>([]);
+  const [introFaqs, setIntroFaqs] = useState<Array<{ q: string; a: string }>>([]);
+  const [introFinalPitch, setIntroFinalPitch] = useState<string>('');
+  const [showIntroEditor, setShowIntroEditor] = useState<boolean>(false);
+
   // 提示詞
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
 
@@ -66,6 +79,19 @@ export default function CourseManager() {
       setUpgradeTo(course.upgradeTo || '');
       setUpgradeDiscount(course.upgradeDiscount ?? 0);
       setUpgradeWindowDays(course.upgradeWindowDays ?? 7);
+      const ip = (course as unknown as { introPage?: Record<string, unknown> }).introPage || {};
+      setIntroSlug((ip.slug as string) || '');
+      setIntroHeroTitle((ip.heroTitle as string) || '');
+      setIntroHeroSubtitle((ip.heroSubtitle as string) || '');
+      setIntroHeroImage((ip.heroImage as string) || '');
+      const pp = (ip.painPoints as string[]) || [];
+      setIntroPainPoints([...pp, '', '', '', '', ''].slice(0, 5));
+      const bb = (ip.benefits as string[]) || [];
+      setIntroBenefits([...bb, '', '', '', '', ''].slice(0, 5));
+      setIntroCtaPrimary((ip.ctaPrimaryText as string) || '');
+      setIntroBonusItems((ip.bonusItems as Array<{ title: string; value: number }>) || []);
+      setIntroFaqs((ip.faqs as Array<{ q: string; a: string }>) || []);
+      setIntroFinalPitch((ip.finalPitch as string) || '');
     } else {
       setIsNew(true);
       setEditing(null);
@@ -82,6 +108,16 @@ export default function CourseManager() {
       setUpgradeTo('');
       setUpgradeDiscount(0);
       setUpgradeWindowDays(7);
+      setIntroSlug('');
+      setIntroHeroTitle('');
+      setIntroHeroSubtitle('');
+      setIntroHeroImage('');
+      setIntroPainPoints(['', '', '', '', '']);
+      setIntroBenefits(['', '', '', '', '']);
+      setIntroCtaPrimary('');
+      setIntroBonusItems([]);
+      setIntroFaqs([]);
+      setIntroFinalPitch('');
     }
   };
 
@@ -294,6 +330,18 @@ export default function CourseManager() {
       upgradeTo: upgradeTo || null,
       upgradeDiscount: upgradeDiscount || 0,
       upgradeWindowDays: upgradeWindowDays ?? 7,
+      introPage: introSlug ? {
+        slug: introSlug,
+        heroTitle: introHeroTitle,
+        heroSubtitle: introHeroSubtitle,
+        heroImage: introHeroImage,
+        painPoints: introPainPoints.filter((p) => p.trim()),
+        benefits: introBenefits.filter((b) => b.trim()),
+        ctaPrimaryText: introCtaPrimary,
+        bonusItems: introBonusItems.filter((b) => b.title.trim()),
+        faqs: introFaqs.filter((f) => f.q.trim() && f.a.trim()),
+        finalPitch: introFinalPitch,
+      } : null,
       createdAt: editing?.createdAt || Timestamp.now(),
     };
 
@@ -419,6 +467,105 @@ export default function CourseManager() {
                 <p className="text-xs text-gray-500 mt-1">0 = 無限期</p>
               </div>
             </div>
+          </div>
+
+          {/* 引流課銷售頁模板設定 */}
+          <div className="border-t pt-4 mt-2 bg-pink-50/50 -mx-6 px-6 py-4">
+            <button
+              type="button"
+              onClick={() => setShowIntroEditor((v) => !v)}
+              className="flex items-center justify-between w-full text-left"
+            >
+              <h3 className="font-bold text-pink-900">🎨 引流課銷售頁模板（/intro/&#123;slug&#125; 自動產生銷售頁）</h3>
+              <span className="text-sm text-pink-600">{showIntroEditor ? '收起 ▲' : '展開設定 ▼'}</span>
+            </button>
+            {showIntroEditor && (
+              <div className="mt-4 space-y-4">
+                <p className="text-xs text-gray-600">
+                  填了 slug 之後，此課程會自動有獨立銷售頁網址：<code className="bg-white px-2 py-0.5 rounded">/intro/&#123;slug&#125;</code>。其他欄位留空就用預設樣式。
+                </p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">網址 slug（英文小寫，無空格）</label>
+                    <input value={introSlug} onChange={(e) => setIntroSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))} placeholder="例如 ads（→ /intro/ads）" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Hero 圖片 URL</label>
+                    <input value={introHeroImage} onChange={(e) => setIntroHeroImage(e.target.value)} placeholder="https://..." className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">主標題（Hero Title）</label>
+                  <input value={introHeroTitle} onChange={(e) => setIntroHeroTitle(e.target.value)} placeholder="例如：蝦皮廣告不再燒錢" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">副標題</label>
+                  <input value={introHeroSubtitle} onChange={(e) => setIntroHeroSubtitle(e.target.value)} placeholder="例如：3 步驟找到你的保本 ROAS" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">5 條痛點（每條一行）</label>
+                  {introPainPoints.map((p, i) => (
+                    <input key={i} value={p} onChange={(e) => {
+                      const arr = [...introPainPoints]; arr[i] = e.target.value; setIntroPainPoints(arr);
+                    }} placeholder={`痛點 ${i + 1}`} className="w-full border rounded-lg px-3 py-2 text-sm mb-2" />
+                  ))}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">5 條成果（學完會做到）</label>
+                  {introBenefits.map((b, i) => (
+                    <input key={i} value={b} onChange={(e) => {
+                      const arr = [...introBenefits]; arr[i] = e.target.value; setIntroBenefits(arr);
+                    }} placeholder={`成果 ${i + 1}`} className="w-full border rounded-lg px-3 py-2 text-sm mb-2" />
+                  ))}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">主 CTA 按鈕文字</label>
+                  <input value={introCtaPrimary} onChange={(e) => setIntroCtaPrimary(e.target.value)} placeholder={`預設：立即報名 NT$ ${price}`} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">加贈包（可選）</label>
+                  {introBonusItems.map((b, i) => (
+                    <div key={i} className="flex gap-2 mb-2">
+                      <input value={b.title} onChange={(e) => {
+                        const arr = [...introBonusItems]; arr[i] = { ...arr[i], title: e.target.value }; setIntroBonusItems(arr);
+                      }} placeholder="贈品名稱" className="flex-1 border rounded-lg px-3 py-2 text-sm" />
+                      <input type="number" value={b.value} onChange={(e) => {
+                        const arr = [...introBonusItems]; arr[i] = { ...arr[i], value: Number(e.target.value) }; setIntroBonusItems(arr);
+                      }} placeholder="價值" className="w-28 border rounded-lg px-3 py-2 text-sm" />
+                      <button type="button" onClick={() => setIntroBonusItems(introBonusItems.filter((_, idx) => idx !== i))} className="text-red-500 text-sm px-2">✕</button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => setIntroBonusItems([...introBonusItems, { title: '', value: 0 }])} className="text-sm text-blue-600 hover:underline">+ 新增加贈</button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">常見問題（Q&A）</label>
+                  {introFaqs.map((f, i) => (
+                    <div key={i} className="border rounded-lg p-3 mb-2 bg-white">
+                      <input value={f.q} onChange={(e) => {
+                        const arr = [...introFaqs]; arr[i] = { ...arr[i], q: e.target.value }; setIntroFaqs(arr);
+                      }} placeholder="問題" className="w-full border rounded px-2 py-1 text-sm mb-2" />
+                      <textarea value={f.a} onChange={(e) => {
+                        const arr = [...introFaqs]; arr[i] = { ...arr[i], a: e.target.value }; setIntroFaqs(arr);
+                      }} placeholder="答案" rows={2} className="w-full border rounded px-2 py-1 text-sm" />
+                      <button type="button" onClick={() => setIntroFaqs(introFaqs.filter((_, idx) => idx !== i))} className="text-red-500 text-xs mt-1">✕ 移除</button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => setIntroFaqs([...introFaqs, { q: '', a: '' }])} className="text-sm text-blue-600 hover:underline">+ 新增 Q&A</button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">底部最後一推文字（可選）</label>
+                  <input value={introFinalPitch} onChange={(e) => setIntroFinalPitch(e.target.value)} placeholder="例如：13 年實戰換來的判斷力，今天 NT$299 帶你看懂" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Chapters */}

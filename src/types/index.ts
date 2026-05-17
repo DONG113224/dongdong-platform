@@ -72,6 +72,20 @@ export interface Course {
   upgradeTo?: string;          // 升級到哪個課程 ID（主課程）
   upgradeDiscount?: number;    // 升級時可折抵的金額（例如 299）
   upgradeWindowDays?: number;  // 升級期限天數（0 = 無限期，預設 7）
+  // 銷售頁模板設定（讓 /intro/{slug} 自動渲染）
+  introPage?: {
+    slug?: string;             // 網址 slug，例如 'ads' → /intro/ads
+    heroTitle?: string;        // 主標題
+    heroSubtitle?: string;     // 副標題
+    heroImage?: string;        // Hero 圖片 URL
+    painPoints?: string[];     // 痛點 5 條
+    benefits?: string[];       // 成果 5 條
+    ctaPrimaryText?: string;   // 主 CTA 按鈕文字（例如「立即報名 NT$299」）
+    ctaSecondaryText?: string; // 次 CTA 文字（例如「LINE 詢問東東」）
+    bonusItems?: Array<{ title: string; value: number }>;  // 加贈包
+    faqs?: Array<{ q: string; a: string }>;
+    finalPitch?: string;       // 底部最後一推文字
+  };
 }
 
 export type OrderStatus = 'pending' | 'paid' | 'refunded' | 'cancelled';

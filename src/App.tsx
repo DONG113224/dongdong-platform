@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import SalesPage from './pages/SalesPage';
+import IntroSalesPage from './pages/IntroSalesPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderResultPage from './pages/OrderResultPage';
@@ -54,6 +55,7 @@ export default function App() {
           <Routes>
             {/* 前台路由 */}
             <Route path="/" element={<SalesPage />} />
+            <Route path="/intro/:slug" element={<IntroSalesPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-result" element={<OrderResultPage />} />
