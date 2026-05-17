@@ -2,8 +2,11 @@ import { useState } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
 } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { trackEvent } from '../lib/fbpixel';
 import { useAuth } from '../contexts/AuthContext';
@@ -58,16 +61,84 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     window.location.href = `${getSocialLoginBaseUrl()}/api/lineLogin?state=login`;
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     if (isInAppBrowser()) {
       setShowBrowserTip(true);
       return;
     }
-    window.location.href = `${getSocialLoginBaseUrl()}/api/googleLogin?state=login`;
+    setLoading(true);
+    setError('');
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      // 首次登入建立 Firestore user doc
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          email: user.email || '',
+          displayName: user.displayName || '',
+          photoURL: user.photoURL || '',
+          provider: 'google',
+          createdAt: serverTimestamp(),
+          purchasedCourses: [],
+        });
+        trackEvent('CompleteRegistration');
+      }
+      await refreshUserData();
+      onClose();
+      onSuccess?.();
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (err?.code === 'auth/popup-closed-by-user') {
+        // 使用者取消
+      } else if (err?.code === 'auth/operation-not-allowed') {
+        setError('Google 登入未啟用，請聯絡客服');
+      } else {
+        setError('Google 登入失敗：' + msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleFacebookLogin = () => {
-    window.location.href = `${getSocialLoginBaseUrl()}/api/facebookLogin?state=login`;
+  const handleFacebookLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const provider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userRef = doc(db, 'users', user.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          email: user.email || '',
+          displayName: user.displayName || '',
+          photoURL: user.photoURL || '',
+          provider: 'facebook',
+          createdAt: serverTimestamp(),
+          purchasedCourses: [],
+        });
+        trackEvent('CompleteRegistration');
+      }
+      await refreshUserData();
+      onClose();
+      onSuccess?.();
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (err?.code === 'auth/popup-closed-by-user') {
+        // 取消
+      } else if (err?.code === 'auth/operation-not-allowed') {
+        setError('Facebook 登入未啟用，請聯絡客服');
+      } else {
+        setError('Facebook 登入失敗：' + msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
