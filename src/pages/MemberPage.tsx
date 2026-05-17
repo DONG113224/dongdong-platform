@@ -523,6 +523,50 @@ export default function MemberPage() {
                         </p>
                       </div>
                     </div>
+                    {/* 升級主課程按鈕（引流課專用） */}
+                    {(() => {
+                      const c = course as unknown as { upgradeTo?: string; upgradeDiscount?: number; upgradeWindowDays?: number };
+                      if (!c.upgradeTo || !c.upgradeDiscount || c.upgradeDiscount <= 0) return null;
+                      const introOrder = orders.find((o) => o.courseId === course.id && o.status === 'paid' && o.paidAt);
+                      if (!introOrder?.paidAt) return null;
+                      const windowDays = c.upgradeWindowDays ?? 7;
+                      const paidAtDate = introOrder.paidAt.toDate();
+                      const expireAt = windowDays > 0 ? new Date(paidAtDate.getTime() + windowDays * 24 * 60 * 60 * 1000) : null;
+                      const now = new Date();
+                      const expired = expireAt && now > expireAt;
+                      const daysLeft = expireAt ? Math.max(0, Math.ceil((expireAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))) : null;
+                      // 若已購主課程，則不顯示
+                      if (courses.some((cc) => cc.id === c.upgradeTo)) return null;
+                      return (
+                        <div className="px-4 pb-4">
+                          <div className={`rounded-lg p-3 border ${expired ? 'bg-gray-100 border-gray-300' : 'bg-gradient-to-r from-orange-50 to-yellow-50 border-orange-300'}`}>
+                            {expired ? (
+                              <p className="text-sm text-gray-500">升級期限已到期，無法折抵</p>
+                            ) : (
+                              <>
+                                <p className="text-sm font-bold text-orange-700">
+                                  🚀 升級主課程，現省 NT$ {c.upgradeDiscount.toLocaleString()}
+                                </p>
+                                {daysLeft !== null && (
+                                  <p className="text-xs text-orange-600 mt-1">
+                                    限時優惠：剩 <strong>{daysLeft} 天</strong>（到期 {expireAt!.toLocaleDateString('zh-TW')}）
+                                  </p>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/checkout?courseId=${c.upgradeTo}&from=upgrade`);
+                                  }}
+                                  className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 rounded-lg text-sm"
+                                >
+                                  立即升級 →
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {refundDeadline && !paidOrder?.refundWaived && (
                       <div className="px-4 pb-4">
                         <div className="bg-orange-50 rounded-lg p-3">

@@ -18,6 +18,11 @@ export default function CourseManager() {
   const [isPublished, setIsPublished] = useState(true);
   const [chapters, setChapters] = useState<Chapter[]>([]);
 
+  // 升級主課程設定（引流課用）
+  const [upgradeTo, setUpgradeTo] = useState<string>('');
+  const [upgradeDiscount, setUpgradeDiscount] = useState<number>(0);
+  const [upgradeWindowDays, setUpgradeWindowDays] = useState<number>(7);
+
   // 提示詞
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
 
@@ -58,6 +63,9 @@ export default function CourseManager() {
       setLineGroupUrl(course.noRefundResources?.lineGroupUrl || '');
       setDownloadFiles(course.noRefundResources?.downloadFiles ? [...course.noRefundResources.downloadFiles] : []);
       setDownloadFolders(course.noRefundResources?.downloadFolders ? [...course.noRefundResources.downloadFolders] : []);
+      setUpgradeTo(course.upgradeTo || '');
+      setUpgradeDiscount(course.upgradeDiscount ?? 0);
+      setUpgradeWindowDays(course.upgradeWindowDays ?? 7);
     } else {
       setIsNew(true);
       setEditing(null);
@@ -71,6 +79,9 @@ export default function CourseManager() {
       setLineGroupUrl('');
       setDownloadFiles([]);
       setDownloadFolders([]);
+      setUpgradeTo('');
+      setUpgradeDiscount(0);
+      setUpgradeWindowDays(7);
     }
   };
 
@@ -280,6 +291,9 @@ export default function CourseManager() {
         downloadFiles,
         downloadFolders,
       },
+      upgradeTo: upgradeTo || null,
+      upgradeDiscount: upgradeDiscount || 0,
+      upgradeWindowDays: upgradeWindowDays ?? 7,
       createdAt: editing?.createdAt || Timestamp.now(),
     };
 
@@ -359,6 +373,52 @@ export default function CourseManager() {
               className="w-4 h-4"
             />
             <label className="text-sm">發布上架</label>
+          </div>
+
+          {/* 升級主課程設定（引流課用） */}
+          <div className="border-t pt-4 mt-2 bg-blue-50/50 -mx-6 px-6 py-4">
+            <h3 className="font-bold text-blue-900 mb-1">🚀 升級主課程設定（引流課專用）</h3>
+            <p className="text-xs text-gray-600 mb-3">
+              此設定讓買了「這個課程」的學員，在指定期限內升級到指定主課程時，自動折抵指定金額。
+              <br />
+              <strong>留空或設為 0 = 此課程不是引流課，沒有升級功能。</strong>
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">升級到哪個課程</label>
+                <select
+                  value={upgradeTo}
+                  onChange={(e) => setUpgradeTo(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm bg-white"
+                >
+                  <option value="">— 不設定（此非引流課）—</option>
+                  {courses.filter((c) => c.id !== editing?.id).map((c) => (
+                    <option key={c.id} value={c.id}>{c.title}（NT$ {c.price}）</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">升級時折抵金額 (NT$)</label>
+                <input
+                  type="number"
+                  value={upgradeDiscount}
+                  onChange={(e) => setUpgradeDiscount(Number(e.target.value))}
+                  placeholder="例如 299"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">升級期限（天）</label>
+                <input
+                  type="number"
+                  value={upgradeWindowDays}
+                  onChange={(e) => setUpgradeWindowDays(Number(e.target.value))}
+                  placeholder="7"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">0 = 無限期</p>
+              </div>
+            </div>
           </div>
 
           {/* Chapters */}

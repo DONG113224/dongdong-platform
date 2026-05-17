@@ -68,6 +68,10 @@ export interface Course {
   prompts?: PromptItem[];
   noRefundResources?: NoRefundResources;
   createdAt: Timestamp;
+  // 升級主課程設定（引流課用）
+  upgradeTo?: string;          // 升級到哪個課程 ID（主課程）
+  upgradeDiscount?: number;    // 升級時可折抵的金額（例如 299）
+  upgradeWindowDays?: number;  // 升級期限天數（0 = 無限期，預設 7）
 }
 
 export type OrderStatus = 'pending' | 'paid' | 'refunded' | 'cancelled';

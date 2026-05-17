@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { trackEvent } from '../lib/fbpixel';
@@ -20,6 +22,7 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState<Record<string, string> | null>(null);
   const [paymentUrl, setPaymentUrl] = useState('');
   const [showNoRefundModal, setShowNoRefundModal] = useState(false);
+  const [estimatedDiscount, setEstimatedDiscount] = useState<{ amount: number; fromCourseTitle: string } | null>(null);
 
   // 表單資料就緒後自動提交到藍新
   useEffect(() => {
@@ -27,6 +30,42 @@ export default function CheckoutPage() {
       formRef.current.submit();
     }
   }, [formData, paymentUrl]);
+
+  // 預估升級折抵：查用戶買過的「引流課」是否設定 upgradeTo 等於當前購物車中的課
+  useEffect(() => {
+    if (!firebaseUser || items.length !== 1) { setEstimatedDiscount(null); return; }
+    const targetCourseId = items[0].courseId;
+    (async () => {
+      try {
+        const ordersSnap = await getDocs(query(
+          collection(db, 'orders'),
+          where('userId', '==', firebaseUser.uid),
+          where('status', '==', 'paid')
+        ));
+        let best: { amount: number; fromCourseTitle: string } | null = null;
+        for (const od of ordersSnap.docs) {
+          const o = od.data() as { courseId?: string; paidAt?: { toDate: () => Date } };
+          if (!o.courseId) continue;
+          const cdocs = await getDocs(query(collection(db, 'courses'), where('__name__', '==', o.courseId)));
+          if (cdocs.empty) continue;
+          const c = cdocs.docs[0].data() as { upgradeTo?: string; upgradeDiscount?: number; upgradeWindowDays?: number; title?: string };
+          if (c.upgradeTo !== targetCourseId) continue;
+          if (!c.upgradeDiscount || c.upgradeDiscount <= 0) continue;
+          const windowDays = c.upgradeWindowDays ?? 7;
+          if (windowDays > 0 && o.paidAt) {
+            const exp = new Date(o.paidAt.toDate().getTime() + windowDays * 86400000);
+            if (new Date() > exp) continue;
+          }
+          if (!best || c.upgradeDiscount > best.amount) {
+            best = { amount: c.upgradeDiscount, fromCourseTitle: c.title || '' };
+          }
+        }
+        setEstimatedDiscount(best);
+      } catch (err) {
+        console.error('Estimate discount failed:', err);
+      }
+    })();
+  }, [firebaseUser, items]);
 
   // 發票選項
   const [invoiceCategory, setInvoiceCategory] = useState<'b2c' | 'b2b'>('b2c');
@@ -153,10 +192,16 @@ export default function CheckoutPage() {
             ))}
           </div>
           <hr />
+          {estimatedDiscount && (
+            <div className="flex justify-between mt-3 text-orange-600">
+              <span className="text-sm">🚀 升級折抵（從「{estimatedDiscount.fromCourseTitle}」）</span>
+              <span className="font-bold">- NT$ {estimatedDiscount.amount.toLocaleString()}</span>
+            </div>
+          )}
           <div className="flex justify-between mt-4">
             <span className="text-lg font-bold">總計</span>
             <span className="text-2xl font-bold text-red-500">
-              NT$ {totalAmount.toLocaleString()}
+              NT$ {Math.max(0, totalAmount - (estimatedDiscount?.amount || 0)).toLocaleString()}
             </span>
           </div>
           {userData && (

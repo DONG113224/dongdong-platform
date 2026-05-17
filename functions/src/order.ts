@@ -61,13 +61,72 @@ export const createOrder = onRequest({ cors: true }, async (req, res) => {
     res.status(400).json({ error: '此課程尚未發布' });
     return;
   }
-  const amount = courseData.price as number;
+  const fullPrice = courseData.price as number;
   const courseTitle = courseData.title as string || '';
 
-  if (!amount || amount <= 0) {
+  if (!fullPrice || fullPrice <= 0) {
     res.status(400).json({ error: '課程價格設定有誤' });
     return;
   }
+
+  // ====== 升級折抵邏輯 ======
+  // 找出用戶買過的「引流課」訂單，其 upgradeTo === 當前 courseId
+  // 且在升級期限內，可折抵 upgradeDiscount
+  let appliedDiscount = 0;
+  let discountSource: { introOrderId: string; introCourseId: string; introCourseTitle: string } | null = null;
+
+  try {
+    const introQuery = await db.collection('orders')
+      .where('userId', '==', decoded.uid)
+      .where('status', '==', 'paid')
+      .get();
+
+    const candidates: Array<{ orderId: string; courseId: string; courseTitle: string; paidAt: Date; upgradeDiscount: number; upgradeWindowDays: number }> = [];
+
+    for (const orderDoc of introQuery.docs) {
+      const o = orderDoc.data();
+      if (!o.courseId) continue;
+      // 載入該訂單對應課程，看是否設定升級到當前 courseId
+      const introCourseDoc = await db.collection('courses').doc(o.courseId).get();
+      if (!introCourseDoc.exists) continue;
+      const introCourseData = introCourseDoc.data()!;
+      if (introCourseData.upgradeTo !== courseId) continue;
+      if (!introCourseData.upgradeDiscount || introCourseData.upgradeDiscount <= 0) continue;
+
+      const paidAt = o.paidAt?.toDate ? o.paidAt.toDate() : new Date(o.paidAt);
+      const windowDays = introCourseData.upgradeWindowDays ?? 7;
+      if (windowDays > 0) {
+        const expireAt = new Date(paidAt.getTime() + windowDays * 24 * 60 * 60 * 1000);
+        if (new Date() > expireAt) continue; // 過期
+      }
+
+      candidates.push({
+        orderId: orderDoc.id,
+        courseId: o.courseId,
+        courseTitle: introCourseData.title || '',
+        paidAt,
+        upgradeDiscount: introCourseData.upgradeDiscount,
+        upgradeWindowDays: windowDays,
+      });
+    }
+
+    if (candidates.length > 0) {
+      // 取折抵金額最大的一筆
+      candidates.sort((a, b) => b.upgradeDiscount - a.upgradeDiscount);
+      const best = candidates[0];
+      appliedDiscount = best.upgradeDiscount;
+      discountSource = {
+        introOrderId: best.orderId,
+        introCourseId: best.courseId,
+        introCourseTitle: best.courseTitle,
+      };
+    }
+  } catch (err) {
+    console.error('Upgrade discount check failed:', err);
+    // 折抵失敗不擋訂單，按原價走
+  }
+
+  const amount = Math.max(0, fullPrice - appliedDiscount);
 
   // 檢查用戶是否退費過此課程
   const refundedSnap = await db.collection('orders')
@@ -109,6 +168,9 @@ export const createOrder = onRequest({ cors: true }, async (req, res) => {
     courseId,
     courseTitle: courseTitle || '',
     amount: Number(amount),
+    fullPrice: Number(fullPrice),
+    appliedDiscount: Number(appliedDiscount),
+    discountSource,
     status: 'pending',
     paymentMethod,
     newebpayTradeNo: '',
