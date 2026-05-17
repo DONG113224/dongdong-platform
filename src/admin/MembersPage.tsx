@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, Timestamp, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+
+interface Course {
+  id: string;
+  title: string;
+}
 
 interface Member {
   uid: string;
@@ -17,10 +22,50 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [grantingFor, setGrantingFor] = useState<Member | null>(null);
+  const [grantBusy, setGrantBusy] = useState(false);
 
   useEffect(() => {
     loadMembers();
+    loadCourses();
   }, []);
+
+  const loadCourses = async () => {
+    try {
+      const snap = await getDocs(collection(db, 'courses'));
+      const list: Course[] = snap.docs.map(d => ({ id: d.id, title: (d.data() as { title?: string }).title || d.id }));
+      setCourses(list);
+    } catch (e) {
+      console.error('Load courses error:', e);
+    }
+  };
+
+  const handleGrantCourse = async (courseId: string) => {
+    if (!grantingFor) return;
+    setGrantBusy(true);
+    try {
+      await updateDoc(doc(db, 'users', grantingFor.uid), { purchasedCourses: arrayUnion(courseId) });
+      alert(`已贈送課程「${courses.find(c => c.id === courseId)?.title || courseId}」給 ${grantingFor.displayName || grantingFor.email}`);
+      setGrantingFor(null);
+      await loadMembers();
+    } catch (e) {
+      console.error(e);
+      alert('贈送失敗：' + (e as Error).message);
+    } finally {
+      setGrantBusy(false);
+    }
+  };
+
+  const handleRevokeCourse = async (member: Member, courseId: string) => {
+    if (!confirm(`確定要移除 ${member.displayName || member.email} 的課程「${courses.find(c => c.id === courseId)?.title || courseId}」嗎？`)) return;
+    try {
+      await updateDoc(doc(db, 'users', member.uid), { purchasedCourses: arrayRemove(courseId) });
+      await loadMembers();
+    } catch (e) {
+      alert('移除失敗：' + (e as Error).message);
+    }
+  };
 
   const loadMembers = async () => {
     try {
@@ -102,6 +147,7 @@ export default function MembersPage() {
                   <th className="text-center p-3">已購課程</th>
                   <th className="text-left p-3">註冊時間</th>
                   <th className="text-left p-3">UID</th>
+                  <th className="text-center p-3">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,6 +169,14 @@ export default function MembersPage() {
                     <td className="p-3 text-center font-bold">{m.purchasedCourses?.length || 0}</td>
                     <td className="p-3 text-sm text-gray-600">{formatDate(m.createdAt)}</td>
                     <td className="p-3 text-xs font-mono text-gray-400">{m.uid.slice(0, 10)}...</td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => setGrantingFor(m)}
+                        className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                      >
+                        贈送課程
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -133,6 +187,56 @@ export default function MembersPage() {
           </div>
         )}
       </div>
+
+      {/* 贈送課程 Modal */}
+      {grantingFor && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !grantBusy && setGrantingFor(null)}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2">贈送課程</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              對象：<strong>{grantingFor.displayName || grantingFor.email}</strong>
+            </p>
+            {(grantingFor.purchasedCourses?.length || 0) > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-gray-500 mb-2">已擁有的課程（點 ✕ 移除）：</p>
+                <div className="space-y-1">
+                  {grantingFor.purchasedCourses!.map(cid => (
+                    <div key={cid} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                      <span>{courses.find(c => c.id === cid)?.title || cid}</span>
+                      <button onClick={() => handleRevokeCourse(grantingFor, cid)} className="text-red-500 hover:text-red-700 text-xs">✕ 移除</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mb-2">選擇要贈送的課程：</p>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {courses.length === 0 ? (
+                <p className="text-sm text-gray-400">尚無課程資料</p>
+              ) : (
+                courses.map(c => {
+                  const owned = grantingFor.purchasedCourses?.includes(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      disabled={owned || grantBusy}
+                      onClick={() => handleGrantCourse(c.id)}
+                      className={`w-full text-left p-3 rounded border text-sm ${owned ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'hover:bg-blue-50 border-gray-200'}`}
+                    >
+                      {c.title} {owned && '（已擁有）'}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button onClick={() => setGrantingFor(null)} disabled={grantBusy} className="px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200">
+                關閉
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
