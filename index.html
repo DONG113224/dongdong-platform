@@ -61,7 +61,7 @@
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- LINE OA 浮動按鈕 -->
-    <a href="https://lin.ee/WeQw0Du"
+    <a href="https://line.me/R/ti/p/@salted96789madefy"
        target="_blank"
        rel="noopener noreferrer"
        class="line-oa-fab"
@@ -73,10 +73,11 @@
     </a>
     <style>
       .line-oa-fab {
-        position: fixed;
+       .line-oa-fab {
+        position: fixed !important;
         bottom: 24px;
         right: 24px;
-        display: inline-flex;
+        display: inline-flex !important;
         align-items: center;
         gap: 10px;
         padding: 14px 22px;
@@ -88,9 +89,13 @@
         font-weight: 700;
         border-radius: 999px;
         box-shadow: 0 6px 20px rgba(6, 199, 85, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1);
-        z-index: 9999;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        isolation: isolate;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         animation: line-pulse 2.5s ease-in-out infinite;
+      }
       }
       .line-oa-fab:hover {
         transform: translateY(-3px) scale(1.03);
