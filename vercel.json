@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://us-central1-dongdong-platform-86468.cloudfunctions.net/:path*"
+      "destination": "https://us-central1-dongdong-platform-v2.cloudfunctions.net/:path*"
     },
     {
       "source": "/(.*)",
