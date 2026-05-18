@@ -60,5 +60,50 @@
       });
     </script>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- LINE OA 浮動按鈕 -->
+    <a href="https://lin.ee/WeQw0Du"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="line-oa-fab"
+       aria-label="加入東東 LINE 官方帳號">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="white" aria-hidden="true">
+        <path d="M19.365 9.89c.49 0 .89.4.89.89 0 .5-.4.9-.89.9h-2.485v1.59h2.485c.49 0 .89.4.89.895 0 .495-.4.895-.89.895h-3.38c-.495 0-.895-.4-.895-.895V7.79c0-.495.4-.9.895-.9h3.38c.49 0 .89.4.89.9 0 .5-.4.895-.89.895h-2.485v1.205h2.485zm-4.18 4.27c0 .386-.246.728-.617.85a.918.918 0 0 1-.28.043c-.276 0-.534-.13-.715-.36L10.99 11.04v3.12c0 .495-.4.895-.895.895s-.895-.4-.895-.895V7.789c0-.385.244-.728.618-.85a.886.886 0 0 1 .276-.046c.27 0 .533.135.713.36l2.584 3.65V7.789c0-.495.4-.9.895-.9.495 0 .898.405.898.9v6.37zm-6.27 0c0 .495-.4.895-.896.895-.495 0-.895-.4-.895-.895V7.789c0-.495.4-.9.895-.9.495 0 .896.405.896.9v6.37zm-2.66.895H2.876c-.494 0-.896-.4-.896-.895V7.789c0-.495.402-.9.896-.9.495 0 .895.405.895.9v5.475h2.585c.493 0 .89.4.89.895 0 .493-.397.896-.89.896M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.39.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+      </svg>
+      <span class="line-oa-fab-label">加 LINE 領取課程資訊</span>
+    </a>
+    <style>
+      .line-oa-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 22px;
+        background: #06C755;
+        color: white;
+        text-decoration: none;
+        font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(6, 199, 85, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: line-pulse 2.5s ease-in-out infinite;
+      }
+      .line-oa-fab:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 12px 32px rgba(6, 199, 85, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      @keyframes line-pulse {
+        0%, 100% { box-shadow: 0 6px 20px rgba(6, 199, 85, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(6, 199, 85, 0.45); }
+        50%      { box-shadow: 0 6px 20px rgba(6, 199, 85, 0.5),  0 2px 6px rgba(0, 0, 0, 0.15), 0 0 0 12px rgba(6, 199, 85, 0); }
+      }
+      @media (max-width: 640px) {
+        .line-oa-fab { bottom: 16px; right: 16px; padding: 14px; gap: 0; }
+        .line-oa-fab-label { display: none; }
+      }
+    </style>
   </body>
 </html>
